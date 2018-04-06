@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
+ESP8266WebServer server(80);
 int ledPin = 16;
 bool ledState = LOW;
 
@@ -37,19 +38,22 @@ void loop() {
 }
 
 void turnOn(){
-ledState = HIGH;
-digitalWrite(ledPin, ledState);
-server.send(200, "text/plain", "LED on");
+  Serial.println("Hit turnOn function");
+  ledState = HIGH;
+  digitalWrite(ledPin, ledState);
+  server.send(200, "text/plain", "LED on");
 }
 
 void turnOff(){
-ledState = LOW;
-digitalWrite(ledPin, ledState);
-server.send(200, "text/plain", "LED off");
+  Serial.println("Hit turnOff function");
+  ledState = LOW;
+  digitalWrite(ledPin, ledState);
+  server.send(200, "text/plain", "LED off");
 }
 
 void toggle(){
-ledState = !ledState;
-digitalWrite(ledPin, ledState);
-server.send(200, "text/plain", "LED toggled");
-}
+    Serial.println("Hit Toggle function");
+  ledState = !ledState;
+  digitalWrite(ledPin, ledState);
+  server.send(200, "text/plain", "LED toggled");
+ }
