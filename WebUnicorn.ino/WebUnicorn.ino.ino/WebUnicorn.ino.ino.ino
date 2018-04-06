@@ -30,40 +30,36 @@ void setup() {
   
   Serial.print("Connect on http://");
   Serial.println(WiFi.localIP()); //Print the local IP
-  
   delay(3000); //power up safety delay
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness(  BRIGHTNESS );
   server.on("/on", turnOn);         //Associate the handler function to the path
   server.on("/off", turnOff);        //Associate the handler function to the path
   server.on("/toggle", toggle);   //Associate the handler function to the path
-  
   server.begin(); //Start the server
   Serial.println("Server listening");
-
 }
 
 void loop() {
   previousState = ledState;
   server.handleClient();
   ///****need to thread this******
-  ChangePalettePeriodically();
-  uint8_t maxChanges = 24; 
-  nblendPaletteTowardPalette( currentPalette, targetPalette, maxChanges);
-  static uint8_t startIndex = 0;
-  startIndex = startIndex + 1; /* motion speed */
-  FillLEDsFromPaletteColors( startIndex);
- /*if (ledState = 1) {
-  if (previousState = LOW) { 
-       turnLEDSOn();
-       Serial.println("Turning on LEDS");
-   }
- } else {
-  if (previousState = HIGH) {
-    turnLEDSOff(); 
-    Serial.println("Turning off LEDS");
+  if (ledState = LOW) {
+      ChangePalettePeriodically();
+      uint8_t maxChanges = 24; 
+      nblendPaletteTowardPalette( currentPalette, targetPalette, maxChanges);
+      static uint8_t startIndex = 0;
+      startIndex = startIndex + 1; /* motion speed */
+      FillLEDsFromPaletteColors( startIndex);
+      FastLED.show();
+      FastLED.delay(1000 / UPDATES_PER_SECOND);
   }
- }*/
+  if (previousState != ledState) { 
+     Serial.println("State has changed from ");
+     Serial.println(previousState);
+     Serial.println(" to ");
+     Serial.println(ledState);
+  }
   //*******end of fastled stuff************
 }
 
@@ -77,6 +73,7 @@ server.send(200, "text/plain", "LED on");
 void turnOff(){
 ledState = HIGH;
 turnLEDSOff();
+Serial.println("ledState changed to ", ledState);
 digitalWrite(inbuild_ledPin, ledState);
 server.send(200, "text/plain", "LED off");
 }
@@ -89,12 +86,14 @@ server.send(200, "text/plain", "LED toggled");
 
 void turnLEDSOn(){
   Serial.println("Turning on LEDS");
-  FastLED.show();
-  FastLED.delay(1000 / UPDATES_PER_SECOND);
+  
 }
 void turnLEDSOff(){
-  
- FastLED.clear();
+  for( int i = 0; i < NUM_LEDS; i++) {
+          leds[i] = CRGB::Black;
+     }
+     FastLED.show();
+ 
 }
 
 //*****************Start FastLED Functions****************
@@ -108,7 +107,6 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex)
     colorIndex += 3;
   }
 }
-
 
 void ChangePalettePeriodically()
 {
