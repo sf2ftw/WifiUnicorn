@@ -4,10 +4,10 @@
 
 int inbuild_ledPin = 16;
 bool ledState = LOW;
-bool LEDSState = 0;
+bool previousState = LOW;
 
 ESP8266WebServer server(80);
-#define LED_PIN     3
+#define LED_PIN     2
 #define NUM_LEDS    3
 #define BRIGHTNESS  96
 #define LED_TYPE    WS2811
@@ -21,7 +21,8 @@ CRGBPalette16 targetPalette( RainbowColors_p);
 void setup() {
   pinMode(inbuild_ledPin, OUTPUT);
   Serial.begin(115200);
-  WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
+  //WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
+  WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
   while (WiFi.status() != WL_CONNECTED) { //Wait for connection
       delay(3000);
       Serial.println("Waiting to connect…");
@@ -43,8 +44,8 @@ void setup() {
 }
 
 void loop() {
+  previousState = ledState;
   server.handleClient();
-
   ///****need to thread this******
   ChangePalettePeriodically();
   uint8_t maxChanges = 24; 
@@ -52,22 +53,30 @@ void loop() {
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1; /* motion speed */
   FillLEDsFromPaletteColors( startIndex);
- if (LEDSState = 1) {
-  turnLEDSOn()
+ /*if (ledState = 1) {
+  if (previousState = LOW) { 
+       turnLEDSOn();
+       Serial.println("Turning on LEDS");
+   }
  } else {
-  turnLEDSOff()
- }
+  if (previousState = HIGH) {
+    turnLEDSOff(); 
+    Serial.println("Turning off LEDS");
+  }
+ }*/
   //*******end of fastled stuff************
 }
 
 void turnOn(){
 ledState = LOW;
+turnLEDSOn();
 digitalWrite(inbuild_ledPin, ledState);
 server.send(200, "text/plain", "LED on");
 }
 
 void turnOff(){
 ledState = HIGH;
+turnLEDSOff();
 digitalWrite(inbuild_ledPin, ledState);
 server.send(200, "text/plain", "LED off");
 }
@@ -79,10 +88,12 @@ server.send(200, "text/plain", "LED toggled");
 }
 
 void turnLEDSOn(){
- FastLED.show();
+  Serial.println("Turning on LEDS");
+  FastLED.show();
   FastLED.delay(1000 / UPDATES_PER_SECOND);
 }
 void turnLEDSOff(){
+  
  FastLED.clear();
 }
 
