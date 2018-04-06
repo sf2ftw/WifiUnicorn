@@ -5,6 +5,8 @@
 ESP8266WebServer server(80);
 int ledPin = 16;
 bool ledState = LOW;
+int isitlooping = 0;
+
 
 void setup() {
 
@@ -34,19 +36,21 @@ Serial.println("Server listening");
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  server.handleClient();
+  Serial.println(isitlooping);
+  isitlooping = isitlooping + 1;
 }
 
 void turnOn(){
   Serial.println("Hit turnOn function");
-  ledState = HIGH;
+  ledState = LOW;
   digitalWrite(ledPin, ledState);
   server.send(200, "text/plain", "LED on");
 }
 
 void turnOff(){
   Serial.println("Hit turnOff function");
-  ledState = LOW;
+  ledState = HIGH;
   digitalWrite(ledPin, ledState);
   server.send(200, "text/plain", "LED off");
 }
