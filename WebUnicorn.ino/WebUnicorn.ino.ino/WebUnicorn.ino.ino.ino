@@ -52,7 +52,7 @@ void loop() {
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1; /* motion speed */
   FillLEDsFromPaletteColors( startIndex);
- if LEDSState = 1 {
+ if (LEDSState = 1) {
   turnLEDSOn()
  } else {
   turnLEDSOff()
