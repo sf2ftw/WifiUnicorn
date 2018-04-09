@@ -1,12 +1,15 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <FastLED.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
+WiFiUDP ntpUDP;
 int inbuild_ledPin = 16;
 bool ledState = LOW;
 bool previousState = LOW;
-
 ESP8266WebServer server(80);
+
 #define LED_PIN     2
 #define NUM_LEDS    3
 #define BRIGHTNESS  96
@@ -15,6 +18,7 @@ ESP8266WebServer server(80);
 CRGB leds[NUM_LEDS];
 #define UPDATES_PER_SECOND 100
 
+NTPClient timeClient(ntpUDP);
 CRGBPalette16 currentPalette( CloudColors_p);
 CRGBPalette16 targetPalette( RainbowColors_p);
 
@@ -38,6 +42,10 @@ void setup() {
   server.on("/toggle", toggle);   //Associate the handler function to the path
   server.begin(); //Start the server
   Serial.println("Server listening");
+  timeClient.begin();
+  timeClient.update();
+  Serial.println(timeClient.getFormattedTime());
+
 }
 
 void loop() {
