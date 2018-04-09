@@ -21,8 +21,8 @@ CRGBPalette16 targetPalette( RainbowColors_p);
 void setup() {
   pinMode(inbuild_ledPin, OUTPUT);
   Serial.begin(115200);
-  //WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
-  WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
+  WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
+  //WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
   while (WiFi.status() != WL_CONNECTED) { //Wait for connection
       delay(3000);
       Serial.println("Waiting to connect…");
@@ -73,13 +73,18 @@ server.send(200, "text/plain", "LED on");
 void turnOff(){
 ledState = HIGH;
 turnLEDSOff();
-Serial.println("ledState changed to ", ledState);
+Serial.println("ledState changed to ")
+Serial.println(ledState);
 digitalWrite(inbuild_ledPin, ledState);
 server.send(200, "text/plain", "LED off");
 }
 
 void toggle(){
 ledState = !ledState;
+if (ledState = LOW) {
+  turnOff();
+} else {
+
 digitalWrite(inbuild_ledPin, ledState);
 server.send(200, "text/plain", "LED toggled");
 }
