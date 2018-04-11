@@ -42,8 +42,10 @@ void setup() {
   server.begin(); //Start the server
   Serial.println("Server listening");
   timeClient.begin();
+  timeClient.setTimeOffset(3600);  //need to be more clever with this at some point, summertime nonsense
   timeClient.update();
   Serial.println(timeClient.getFormattedTime());
+  
 
 }
 
