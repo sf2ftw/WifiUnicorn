@@ -31,7 +31,6 @@ void setup() {
       delay(3000);
       Serial.println("Waiting to connect…");
   }
-  
   Serial.print("Connect on http://");
   Serial.println(WiFi.localIP()); //Print the local IP
   delay(3000); //power up safety delay
@@ -51,6 +50,8 @@ void setup() {
 void loop() {
   previousState = ledState;
   server.handleClient();
+
+  
   ///****need to thread this******
   if (ledState = LOW) {
       ChangePalettePeriodically();
@@ -81,7 +82,7 @@ server.send(200, "text/plain", "LED on");
 void turnOff(){
 ledState = HIGH;
 turnLEDSOff();
-Serial.println("ledState changed to ")
+Serial.println("ledState changed to ");
 Serial.println(ledState);
 digitalWrite(inbuild_ledPin, ledState);
 server.send(200, "text/plain", "LED off");
@@ -92,9 +93,9 @@ ledState = !ledState;
 if (ledState = LOW) {
   turnOff();
 } else {
-
-digitalWrite(inbuild_ledPin, ledState);
-server.send(200, "text/plain", "LED toggled");
+  digitalWrite(inbuild_ledPin, ledState);
+  server.send(200, "text/plain", "LED toggled");
+}
 }
 
 void turnLEDSOn(){
@@ -106,7 +107,6 @@ void turnLEDSOff(){
           leds[i] = CRGB::Black;
      }
      FastLED.show();
- 
 }
 
 //*****************Start FastLED Functions****************
