@@ -25,8 +25,8 @@ CRGBPalette16 targetPalette( RainbowColors_p);
 void setup() {
   pinMode(inbuild_ledPin, OUTPUT);
   Serial.begin(115200);
-  WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
-  //WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
+  //WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
+  WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
   while (WiFi.status() != WL_CONNECTED) { //Wait for connection
       delay(3000);
       Serial.println("Waiting to connect…");
@@ -45,44 +45,26 @@ void setup() {
   timeClient.setTimeOffset(3600);  //need to be more clever with this at some point, summertime nonsense
   timeClient.update();
   Serial.println(timeClient.getFormattedTime());
-  
-
 }
 
 void loop() {
-  previousState = ledState;
   server.handleClient();
-
-  
-  ///****need to thread this******
-  if (ledState = LOW) {
-      ChangePalettePeriodically();
-      uint8_t maxChanges = 24; 
-      nblendPaletteTowardPalette( currentPalette, targetPalette, maxChanges);
-      static uint8_t startIndex = 0;
-      startIndex = startIndex + 1; /* motion speed */
-      FillLEDsFromPaletteColors( startIndex);
-      FastLED.show();
-      FastLED.delay(1000 / UPDATES_PER_SECOND);
+  if (ledState == 1) {
+      turnOn();
+  } else {
+    turnOff();
   }
-  if (previousState != ledState) { 
-     Serial.println("State has changed from ");
-     Serial.println(previousState);
-     Serial.println(" to ");
-     Serial.println(ledState);
-  }
-  //*******end of fastled stuff************
 }
 
 void turnOn(){
-ledState = LOW;
+ledState = 1;
 turnLEDSOn();
 digitalWrite(inbuild_ledPin, ledState);
 server.send(200, "text/plain", "LED on");
 }
 
 void turnOff(){
-ledState = HIGH;
+ledState = 0;
 turnLEDSOff();
 Serial.println("ledState changed to ");
 Serial.println(ledState);
@@ -92,7 +74,7 @@ server.send(200, "text/plain", "LED off");
 
 void toggle(){
 ledState = !ledState;
-if (ledState = LOW) {
+if (ledState == 0) {
   turnOff();
 } else {
   digitalWrite(inbuild_ledPin, ledState);
@@ -102,8 +84,16 @@ if (ledState = LOW) {
 
 void turnLEDSOn(){
   Serial.println("Turning on LEDS");
-  
+  ChangePalettePeriodically();
+  uint8_t maxChanges = 24; 
+  nblendPaletteTowardPalette( currentPalette, targetPalette, maxChanges);
+  static uint8_t startIndex = 0;
+  startIndex = startIndex + 1; /* motion speed */
+  FillLEDsFromPaletteColors( startIndex);
+  FastLED.show();
+  FastLED.delay(1000 / UPDATES_PER_SECOND);
 }
+
 void turnLEDSOff(){
   for( int i = 0; i < NUM_LEDS; i++) {
           leds[i] = CRGB::Black;
