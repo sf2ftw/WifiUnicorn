@@ -22,11 +22,43 @@ NTPClient timeClient(ntpUDP);
 CRGBPalette16 currentPalette( CloudColors_p);
 CRGBPalette16 targetPalette( RainbowColors_p);
 
+//***********************Start Web Functions******************************
+
+void handleRoot(){ 
+  if ( server.hasArg("on") ) {
+    turnOn();
+  } else if ( server.hasArg("off") ) {
+    turnOff();
+  } else if ( server.hasArg("toggle") ) {
+    toggle();
+  } else {
+    server.send ( 200, "text/html", getPage() );
+  }  
+}
+
+String getPage(){
+  String page = "<html lang='fr'><head><meta http-equiv='refresh' content='60' name='viewport' content='width=device-width, initial-scale=1'/>";
+  page += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'><script src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script><script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>";
+  page += "<title>Wifi Unicorn Website</title></head><body>";
+  page += "<div class='container-fluid'>";
+  page +=   "<div class='row'>";
+  page +=     "<div class='col-md-12'>";
+  page +=       "<h1>Wifi Unicorn</h1>";
+  //page +=       "<h3>Mini station m&eacute;t&eacute;o</h3>";
+   page +=        "<span class='badge'>";
+  page +=           etatGpio[1];
+  page +=         "</span></h4></div>";
+  page += "</body></html>";
+  return page;
+}
+
+//***************************end of web page functions***************************
+
 void setup() {
   pinMode(inbuild_ledPin, OUTPUT);
   Serial.begin(115200);
-  //WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
-  WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
+  WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
+  \\WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
   while (WiFi.status() != WL_CONNECTED) { //Wait for connection
       delay(3000);
       Serial.println("Waiting to connect…");
@@ -34,11 +66,12 @@ void setup() {
   Serial.print("Connect on http://");
   Serial.println(WiFi.localIP()); //Print the local IP
   delay(3000); //power up safety delay
-  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );  //add in the LEDs to fast LED
   FastLED.setBrightness(  BRIGHTNESS );
-  server.on("/on", turnOn);         //Associate the handler function to the path
-  server.on("/off", turnOff);        //Associate the handler function to the path
-  server.on("/toggle", toggle);   //Associate the handler function to the path
+  //server.on("/on", turnOn);         //Associate the handler function to the path
+  //server.on("/off", turnOff);        //Associate the handler function to the path
+  //server.on("/toggle", toggle);   //Associate the handler function to the path
+  server.on ("/", handleRoot); //Associate the handleRoot function to deal with all web requests
   server.begin(); //Start the server
   Serial.println("Server listening");
   timeClient.begin();
@@ -106,7 +139,6 @@ void turnLEDSOff(){
 void FillLEDsFromPaletteColors( uint8_t colorIndex)
 {
   uint8_t brightness = 255;
-  
   for( int i = 0; i < NUM_LEDS; i++) {
     leds[i] = ColorFromPalette( currentPalette, colorIndex + sin8(i*16), brightness);
     colorIndex += 3;
@@ -117,7 +149,6 @@ void ChangePalettePeriodically()
 {
   uint8_t secondHand = (millis() / 1000) % 60;
   static uint8_t lastSecond = 99;
-  
   if( lastSecond != secondHand) {
     lastSecond = secondHand;
     CRGB p = CHSV( HUE_PURPLE, 255, 255);
@@ -132,4 +163,4 @@ void ChangePalettePeriodically()
     if( secondHand == 50)  { targetPalette = PartyColors_p; }
   }
 }
-
+//*******************End of LED functions*********************
