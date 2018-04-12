@@ -6,17 +6,19 @@
 
 WiFiUDP ntpUDP;
 int inbuild_ledPin = 16;
-bool ledState = LOW;
+bool ledState = 1;
 bool previousState = LOW;
 ESP8266WebServer server(80);
 
 #define LED_PIN     2
 #define NUM_LEDS    3
-#define BRIGHTNESS  96
+
+#define BRIGHTNESS  200  //default was 96
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
-#define UPDATES_PER_SECOND 100
+//#define UPDATES_PER_SECOND 100
+#define UPDATES_PER_SECOND 20
 
 NTPClient timeClient(ntpUDP);
 CRGBPalette16 currentPalette( CloudColors_p);
@@ -27,10 +29,13 @@ CRGBPalette16 targetPalette( RainbowColors_p);
 void handleRoot(){ 
   if ( server.hasArg("on") ) {
     turnOn();
+    server.send ( 200, "text/html", getPage() );
   } else if ( server.hasArg("off") ) {
     turnOff();
+    server.send ( 200, "text/html", getPage() );
   } else if ( server.hasArg("toggle") ) {
     toggle();
+    server.send ( 200, "text/html", getPage() );
   } else {
     server.send ( 200, "text/html", getPage() );
   }  
@@ -44,10 +49,15 @@ String getPage(){
   page +=   "<div class='row'>";
   page +=     "<div class='col-md-12'>";
   page +=       "<h1>Wifi Unicorn</h1>";
-  //page +=       "<h3>Mini station m&eacute;t&eacute;o</h3>";
-   page +=        "<span class='badge'>";
-  page +=           etatGpio[1];
-  page +=         "</span></h4></div>";
+  page +=       "<br>";
+  page +=        "<span class='badge'>";
+  if (ledState == 0) {
+    page += "Off"; 
+  } else {
+    page += "On"; 
+  }
+  page +=         "</span></h4></div><br>";
+  page +=          "<div class='col-md-4'><form action='/' method='POST'><button type='button submit' name='toggle' value='1' class='btn btn-success btn-lg'>TOGGLE</button></form></div>";
   page += "</body></html>";
   return page;
 }
@@ -57,8 +67,8 @@ String getPage(){
 void setup() {
   pinMode(inbuild_ledPin, OUTPUT);
   Serial.begin(115200);
-  WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
-  \\WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
+  //WiFi.begin("NewMediaDevNet", "BourbonFreeman"); //Connect to the WiFi network
+  WiFi.begin("VM1709525", "qkdg9nsXmtk7"); 
   while (WiFi.status() != WL_CONNECTED) { //Wait for connection
       delay(3000);
       Serial.println("Waiting to connect…");
@@ -93,7 +103,7 @@ void turnOn(){
 ledState = 1;
 turnLEDSOn();
 digitalWrite(inbuild_ledPin, ledState);
-server.send(200, "text/plain", "LED on");
+//server.send(200, "text/plain", "LED on");
 }
 
 void turnOff(){
@@ -102,7 +112,7 @@ turnLEDSOff();
 Serial.println("ledState changed to ");
 Serial.println(ledState);
 digitalWrite(inbuild_ledPin, ledState);
-server.send(200, "text/plain", "LED off");
+//server.send(200, "text/plain", "LED off");
 }
 
 void toggle(){
@@ -111,7 +121,7 @@ if (ledState == 0) {
   turnOff();
 } else {
   digitalWrite(inbuild_ledPin, ledState);
-  server.send(200, "text/plain", "LED toggled");
+//  server.send(200, "text/plain", "LED toggled");
 }
 }
 
@@ -119,6 +129,7 @@ void turnLEDSOn(){
   Serial.println("Turning on LEDS");
   ChangePalettePeriodically();
   uint8_t maxChanges = 24; 
+  //uint8_t maxChanges = 5; 
   nblendPaletteTowardPalette( currentPalette, targetPalette, maxChanges);
   static uint8_t startIndex = 0;
   startIndex = startIndex + 1; /* motion speed */
